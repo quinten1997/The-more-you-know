@@ -19,10 +19,14 @@ def get_fun_fact():
 
     # Generate a fun fact based on the first article found
     article = articles[0]
-    fact_text = f"'{article['title']}' is located nearby at a distance of {article['dist']} meters."
-    fun_fact = format_fun_fact(fact_text)
+    article_title = article['title']
+    article_distance = article['dist']
+    fun_fact = format_fun_fact(article_title)
+    article_url = f"https://en.wikipedia.org/wiki/{article_title.replace(' ', '_')}"
     
-    return jsonify({'fun_fact': fun_fact})
+    response_text = f"Fun Fact at {article_distance} meters from you: {fun_fact}. Read more about this fact at: {article_url}"
+    
+    return jsonify({'fun_fact': response_text})
 
 if __name__ == '__main__':
     app.run(debug=True)
