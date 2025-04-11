@@ -2,7 +2,7 @@ import requests
 from utils.summarizer import summarize_text
 from utils.geo import haversine_distance
 
-def get_wikipedia_nearby(lat, lon, radius, max_results=10):
+def get_wikipedia_nearby(lat, lon, radius, max_results=1):
     url = "https://en.wikipedia.org/w/api.php"
     params = {
         "action": "query",
