@@ -64,6 +64,7 @@ def run_app_logic():
         st.session_state.search_results = combined
         st.session_state.lat = lat
         st.session_state.lon = lon
+        run_search = False
 
     if "search_results" in st.session_state and st.session_state.search_results:
         st.subheader(f"Found {len(st.session_state.search_results)} places")
