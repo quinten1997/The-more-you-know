@@ -1,4 +1,6 @@
+
 import streamlit as st
+import streamlit.components.v1 as components
 from fetchers.opentripmap import get_opentripmap_places
 from fetchers.wikipedia import get_wikipedia_nearby
 from fetchers.overpass import get_osm_overpass
@@ -8,21 +10,45 @@ from ui.map_display import display_map
 def run_app_logic():
     st.title("📍 Nearby Points of Interest Explorer")
 
-    # Initialize session state keys if not already set
-    if "search_results" not in st.session_state:
-        st.session_state.search_results = []
-    if "lat" not in st.session_state:
-        st.session_state.lat = None
-    if "lon" not in st.session_state:
-        st.session_state.lon = None
+    # Inject JavaScript to get user's geolocation
+    components.html(
+        """
+        <script>
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                const data = {latitude: lat, longitude: lon};
+                window.parent.postMessage({type: 'set-location', data: data}, '*');
+            }
+        );
+        </script>
+        """,
+        height=0,
+    )
 
-    with st.sidebar:
-        st.header("Search Options")
-        lat = st.number_input("Latitude", value=52.370216, format="%f")
-        lon = st.number_input("Longitude", value=4.895168, format="%f")
-        radius_m = st.slider("Search radius (meters)", 100, 20000, 1000, 100)
-        categories = st.multiselect("Interests/Categories", ["history", "food", "architecture", "nature"], default=["history"])
-        run_search = st.button("Find Places")
+    # Handle geolocation data
+    if "auto_lat" not in st.session_state:
+        st.session_state.auto_lat = None
+    if "auto_lon" not in st.session_state:
+        st.session_state.auto_lon = None
+    st.experimental_get_query_params()  # Forces re-render to allow JS communication
+
+    # Sidebar inputs with fallback to detected location
+    st.sidebar.header("Search Options")
+    use_manual = st.sidebar.checkbox("📍 Enter location manually", value=False)
+
+    if use_manual or st.session_state.auto_lat is None:
+        lat = st.sidebar.number_input("Latitude", value=52.3702, format="%f")
+        lon = st.sidebar.number_input("Longitude", value=4.8952, format="%f")
+    else:
+        lat = st.session_state.auto_lat
+        lon = st.session_state.auto_lon
+        st.sidebar.success(f"Using detected location: {lat:.4f}, {lon:.4f}")
+
+    radius_m = st.sidebar.slider("Search radius (meters)", 100, 20000, 1000, 100)
+    categories = st.sidebar.multiselect("Interests/Categories", ["history", "food", "architecture", "nature"], default=["history"])
+    run_search = st.sidebar.button("Find Places")
 
     if run_search:
         results_all = []
@@ -38,13 +64,11 @@ def run_app_logic():
         st.session_state.search_results = combined
         st.session_state.lat = lat
         st.session_state.lon = lon
-        run_search == False
 
-    # Display results if they exist
-    if st.session_state.search_results:
+    if "search_results" in st.session_state and st.session_state.search_results:
         st.subheader(f"Found {len(st.session_state.search_results)} places")
         display_map(
-            st.session_state.lat or lat,
-            st.session_state.lon or lon,
+            st.session_state.get("lat", lat),
+            st.session_state.get("lon", lon),
             st.session_state.search_results
         )
