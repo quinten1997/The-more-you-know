@@ -1,75 +1,111 @@
+# 📍 Nearby Points of Interest Explorer
 
-# The More You Know
+This is a mobile-friendly, location-aware web application built with Python and Streamlit. It helps users discover nearby landmarks, historical sites, restaurants, natural features, and more — based on their location and interests. It uses open data APIs and optionally summarizes facts using a free, open-source language model.
 
-This project fetches the user's location and provides a fun fact about the area surrounding that location. It uses the Wikipedia API to obtain information about nearby landmarks and a free LLM API to format the facts nicely.
+---
 
-## Project Structure
+## ✨ Features
 
-- `backend/`: Contains the Flask backend application.
-- `frontend/`: Contains the frontend application to fetch user's location and display fun facts.
+- 📍 Detects or manually inputs user location
+- 📏 User-defined search radius (in meters)
+- 🎯 Interest filters: History, Food, Architecture, Nature
+- 🌐 Uses free APIs:
+  - OpenStreetMap + Overpass
+  - OpenTripMap
+  - Wikipedia
+- 🤖 Uses open-source LLM (e.g. BART) to summarize long descriptions
+- 🗺️ Interactive map and fact list (optimized for mobile)
+- ✅ Works fully on free-tier deployments (Streamlit Cloud, Render, Railway)
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/quinten1997/The-more-you-know.git
 
 ```
-The_More_You_Know
-├─ README.md
-├─ backend
-│  ├─ .env
-│  ├─ README.md
-│  ├─ app.py
-│  ├─ fetch_location.py
-│  └─ requirements.txt
-└─ frontend
-   ├─ App.js
-   ├─ README.md
-   └─ package.json
 
+### 2. Install dependencies
+```bash
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-### Backend
+### 3. Set your API keys (optional but recommended)
+Create a `.env` file or set environment variables:
+```
+OPENTRIPMAP_API_KEY=your_key
+GEONAMES_USERNAME=your_geonames_username
+YELP_API_KEY=your_yelp_key  # optional
+```
 
-The backend is a Flask application that fetches nearby Wikipedia articles and formats the fun facts using a GPT-2 model.
+### 4. Run the app
+```bash
+streamlit run app.py
+```
 
-#### Setup
+---
 
-1. **Create a virtual environment and activate it**:
-    ```bash
-    python -m venv venv
-    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-    ```
+## 🔑 API Keys
 
-2. **Install the required packages**:
-    ```bash
-    pip install -r requirements.txt
-    ```
+| API          | How to Get It                                      |
+|--------------|----------------------------------------------------|
+| OpenTripMap  | https://opentripmap.io/                            |
+| GeoNames     | http://www.geonames.org/login                      |
+| Yelp Fusion* | https://www.yelp.com/developers/documentation/v3  |
 
-3. **Create a `.env` file** with your API keys and environment variables:
-    ```
-    WIKIPEDIA_API_URL=https://en.wikipedia.org/w/api.php
-    ```
+\*Yelp is optional; you can rely solely on OpenStreetMap.
 
-4. **Run the application**:
-    ```bash
-    python app.py
-    ```
+---
 
-#### API Endpoint
+## 📁 Folder Structure
 
-- **GET /get_fun_fact**: Fetches a fun fact about nearby locations.
-    - **Parameters**:
-        - `lat` (required): Latitude of the user's location.
-        - `lon` (required): Longitude of the user's location.
-    - **Response**: A JSON object containing the fun fact.
-        ```json
-        {
-            "fun_fact": "Did you know? 'Place Name' is located nearby at a distance of X meters."
-        }
-        ```
+```
+location_fact_app/
+├── app.py               # Streamlit entrypoint
+├── backend.py           # Core logic
+├── requirements.txt     # Python dependencies
+├── fetchers/            # API fetch logic
+│   ├── opentripmap.py
+│   ├── wikipedia.py
+│   └── overpass.py
+├── utils/               # Summarizer and geo utilities
+│   ├── summarizer.py
+│   └── geo.py
+├── ui/                  # Map display logic
+│   └── map_display.py
+└── README.md
+```
 
-### Frontend
+---
 
-The frontend is a simple HTML file with JavaScript to fetch the user's location and display fun facts.
+## 🛰️ Deployment
 
-#### Setup
+Recommended platforms:
+- [Streamlit Cloud](https://streamlit.io/cloud) — easiest for quick deployment
+- [Render](https://render.com/)
+- [Railway](https://railway.app/)
 
-1. **Open http://127.0.0.1:5000/get_fun_fact?lat=52.302694&lon=4.567598 (you can change the lon and lat variables to adjust the location) in a web browser**.
+All support free hosting with minor limitations (RAM, sleep on idle, etc).
 
-2. **Click the "Get Fun Fact" button** to fetch a fun fact based on your location.
+---
+
+## 🧠 LLM Summarization (Optional)
+
+This app uses `facebook/bart-large-cnn` via Hugging Face Transformers for summarization. If the model can't be loaded (e.g., on a small server), it will gracefully fall back to simple truncation.
+
+---
+
+## ❤️ Credits
+
+Built using:
+- OpenStreetMap, Wikipedia, OpenTripMap
+- Streamlit, Hugging Face Transformers, Folium
+- Designed for travel lovers, explorers, and local adventurers
+
+---
+
+Feel free to fork and customize for your city, region, or interests!
